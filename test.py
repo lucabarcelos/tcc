@@ -25,7 +25,7 @@ def generate_prompts(distances, angles, subjects, num_prompts):
     while len(prompts) < num_prompts:
         distance = np.random.choice(distances)
         angle = np.random.choice(angles)
-        subject = np.random.choice(subjects)
+        subject = subjects[num_prompts % len(subjects)]
         # location = random.choice(locations)
 
         prompt = f"A {distance} picture of a {subject}, looking from {angle}"
@@ -46,24 +46,44 @@ prompts, chosen_subjects = generate_prompts(distances, angles, subjects, num_pro
 model_id = "stabilityai/stable-diffusion-2-1"
 
 # Use the DPMSolverMultistepScheduler (DPM-Solver++) scheduler here instead
-pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
-pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
-pipe = pipe.to("cuda")
+pipe1 = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+pipe1.scheduler = DPMSolverMultistepScheduler.from_config(pipe1.scheduler.config)
+pipe1 = pipe1.to("cuda")
+
+model_id = "SG161222/Realistic_Vision_V1.4"
+
+pipe2 = AutoPipelineForText2Image.from_pretrained(model_id, torch_dtype=torch.float16)
+pipe2 = pipe2.to("cuda")
 
 start = time.time()
 
+# Create directory if it doesn't exist
+os.makedirs(f"./generated_datasets/animals/stable_diffusion_2_1/256", exist_ok=True)
 for i, prompt in enumerate(prompts):
-    image = pipe(prompt).images[0]
+    image = pipe1(prompt).images[0]
 
-    # Create directory if it doesn't exist
-    os.makedirs(f"./generated_datasets/animals/stable_diffusion_2_1", exist_ok=True)
-    image.save(f"./generated_datasets/animals/stable_diffusion_2_1/{i}.png")
+    image.resize((256,256)).save(f"./generated_datasets/animals/stable_diffusion_2_1/256/{i}.png")
+
+
+# Create directory if it doesn't exist
+os.makedirs(f"./generated_datasets/animals/realistic_vision_1_4", exist_ok=True)
+for i, prompt in enumerate(prompts):
+    image = pipe2(prompt).images[0]
+
+    image.resize((256,256)).save(f"./generated_datasets/animals/realistic_vision_1_4/{i}.png")
 
 
 end = time.time()
 
 # Save chosen subjects as labels file in csv format
-with open("./generated_datasets/animals/stable_diffusion_2_1/labels.csv", "w") as f:
+with open("./generated_datasets/animals/stable_diffusion_2_1/256/labels.csv", "w") as f:
+    writer = csv.writer(f)
+    writer.writerow(["label"])
+    for subject in chosen_subjects:
+        writer.writerow([subject])
+
+# Save chosen subjects as labels file in csv format
+with open("./generated_datasets/animals/realistic_vision_1_4/labels.csv", "w") as f:
     writer = csv.writer(f)
     writer.writerow(["label"])
     for subject in chosen_subjects:
