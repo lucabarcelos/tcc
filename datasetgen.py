@@ -70,12 +70,12 @@ def main():
         # Check if there are existing images, get the last image file and use the number as the starting point
         if not args.overwrite:
             try:
-                startingIndex256 = int(sorted(os.listdir(f"./generated_datasets/{args.theme}/{model}/256"))[-2].split(".")[0])
+                startingIndex256 = sorted([int(a.split(".")[0]) for a in os.listdir(f"./generated_datasets/{args.theme}/{model}/256") if a.split(".")[0].isdigit()])[-1]
             except:
                 startingIndex256 = -1
 
             try:
-                startingIndexNative = int(sorted(os.listdir(f"./generated_datasets/{args.theme}/{model}/native"))[-2].split(".")[0])
+                startingIndexNative = sorted([int(a.split(".")[0]) for a in os.listdir(f"./generated_datasets/{args.theme}/{model}/native") if a.split(".")[0].isdigit()])[-1]
             except:
                 startingIndexNative = -1
 
