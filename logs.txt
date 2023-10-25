@@ -1,0 +1,8 @@
+Model: openjourney_v4, Images: 5, Time: 10.091294527053833s
+Model: stable_diffusion_1_0, Images: 5, Time: 44.76177644729614s
+Model: openjourney_v4, Images: 5, Time: 9.961564302444458s
+Model: stable_diffusion_1_0, Images: 5, Time: 47.3472056388855s
+Model: openjourney_v4, Images: 5, Time: 13.135507345199585s
+Model: stable_diffusion_1_0, Images: 5, Time: 43.42826294898987s
+Model: openjourney_v4, Images: 5, Time: 11.414632081985474s
+Model: stable_diffusion_1_0, Images: 5, Time: 43.22124624252319s
