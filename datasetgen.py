@@ -16,14 +16,17 @@ models = {
 
 distances = {
     "animals": ["close-up", "far away", "medium distance"]
+    ,"fruits": ["close-up", "medium distance"]
 }
 
 angles = {
     "animals": ["straight on", "slightly to the right", "slightly to the left", "slightly from above", "the left", "the right"]
+    ,"fruits": ["straight on", "above", "the left", "the right"]
 }
 
 subjects = {
     "animals": ["dog", "cat", "horse", "spider", "butterfly", "chicken", "sheep", "cow", "squirrel", "elephant"]
+    ,"fruits": ["apple braeburn", "avocado", "banana", "orange", "pear", "lemon", "lime", "papaya", "pineapple", "mango"]
 }
 
 locations = {}
@@ -82,6 +85,10 @@ def main():
         # Generate images
         for j, prompt in enumerate(prompts):
             image = pipe(prompt).images[0]
+
+            # Get around NSFW filter
+            while image.getbbox() is None:
+                image = pipe(prompt).images[0]
 
             # Check for overwrite flag and save images
             if not args.overwrite:
