@@ -38,7 +38,6 @@ def main():
     parser.add_argument("-t", "--theme", default="animals", help="Theme to generate images for", nargs='?')
     parser.add_argument("-c", "--count", default=[5000], help="Amount of images to generate", nargs='*')
     parser.add_argument("-nl", "--nolog", help="Disable logging", action="store_true")
-    parser.add_argument("-ow", "--overwrite", help="Overwrite existing images", action="store_true")
 
     args = parser.parse_args()
 
@@ -68,19 +67,7 @@ def main():
         pipe = pipe.to("cuda")
 
         # Create directory if it doesn't exist
-        create_directories(args.theme, model)
-
-        # Check if there are existing images, get the last image file and use the number as the starting point
-        if not args.overwrite:
-            try:
-                startingIndex256 = sorted([int(a.split(".")[0]) for a in os.listdir(f"./generated_datasets/{args.theme}/{model}/256") if a.split(".")[0].isdigit()])[-1]
-            except:
-                startingIndex256 = -1
-
-            try:
-                startingIndexNative = sorted([int(a.split(".")[0]) for a in os.listdir(f"./generated_datasets/{args.theme}/{model}/native") if a.split(".")[0].isdigit()])[-1]
-            except:
-                startingIndexNative = -1
+        create_directories(args.theme, model, subjects[args.theme])
 
         # Generate images
         for j, prompt in enumerate(prompts):
@@ -90,14 +77,8 @@ def main():
             while image.getbbox() is None:
                 image = pipe(prompt).images[0]
 
-            # Check for overwrite flag and save images
-            if not args.overwrite:
-                save_images(image, args.theme, model, startingIndex256+j+1, startingIndexNative+j+1)
-            else:
-                save_images(image, args.theme, model, j, j)
-
-        # Save chosen subjects as labels file in csv format
-        save_labels(args.theme, model, chosen_subjects, args.overwrite)
+            # Save images
+            save_images(image, args.theme, model, chosen_subjects[j])
 
         end = time.time()
 

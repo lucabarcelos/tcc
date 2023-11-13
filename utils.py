@@ -33,19 +33,30 @@ def generate_prompts(distances, angles, subjects, num_prompts):
 
     return prompts, chosen_subjects
 
-def create_directories(subject, model):
+def create_directories(subject, model, classes):
     """
     Create directories for the generated images if they don't exist.
     """
-    os.makedirs(f"./generated_datasets/{subject}/{model}/256", exist_ok=True)
-    os.makedirs(f"./generated_datasets/{subject}/{model}/native", exist_ok=True)
+    for c in classes:
+        os.makedirs(f"./generated_datasets/{subject}/{model}/256/{c}", exist_ok=True)
+        os.makedirs(f"./generated_datasets/{subject}/{model}/native/{c}", exist_ok=True)
 
-def save_images(image, subject, model, index256, indexNative):
+def save_images(image, subject, model, cls):
     """
     Save the generated images to the respective directories.
     """
-    image.resize((256,256)).save(f"./generated_datasets/{subject}/{model}/256/{index256}.png")
-    image.save(f"./generated_datasets/{subject}/{model}/native/{indexNative}.png")
+    try:
+        index256 = sorted([int(a.split(".")[0]) for a in os.listdir(f"./generated_datasets/{subject}/{model}/256/{cls}") if a.split(".")[0].isdigit()])[-1]
+    except:
+        index256 = 0
+
+    try:
+        indexNative = sorted([int(a.split(".")[0]) for a in os.listdir(f"./generated_datasets/{subject}/{model}/native/{cls}") if a.split(".")[0].isdigit()])[-1]
+    except:
+        indexNative = 0
+
+    image.resize((256,256)).save(f"./generated_datasets/{subject}/{model}/256/{cls}/{index256}.png")
+    image.save(f"./generated_datasets/{subject}/{model}/native/{cls}/{indexNative}.png")
 
 def save_labels(theme, model, chosen_subjects, overwrite=False):
     """
