@@ -46,12 +46,11 @@ def save_images(image, subject, model, cls):
     Save the generated images to the respective directories.
     """
     try:
-        index256 = sorted([int(a.split(".")[0]) for a in os.listdir(f"./generated_datasets/{subject}/{model}/256/{cls}") if a.split(".")[0].isdigit()])[-1]
+        index256 = sorted([int(a.split(".")[0]) for a in os.listdir(f"./generated_datasets/{subject}/{model}/256/{cls}") if a.split(".")[0].isdigit()])[-1] + 1
     except:
         index256 = 0
-
     try:
-        indexNative = sorted([int(a.split(".")[0]) for a in os.listdir(f"./generated_datasets/{subject}/{model}/native/{cls}") if a.split(".")[0].isdigit()])[-1]
+        indexNative = sorted([int(a.split(".")[0]) for a in os.listdir(f"./generated_datasets/{subject}/{model}/native/{cls}") if a.split(".")[0].isdigit()])[-1] + 1
     except:
         indexNative = 0
 
