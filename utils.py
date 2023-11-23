@@ -94,3 +94,20 @@ def save_labels(theme, model, chosen_subjects, overwrite=False):
             writer.writerow(["label"])
             for subject in chosen_subjects:
                 writer.writerow([subject])
+
+def max_samples_per_class(dataset, samples_per_class):
+    # Count the number of samples for each class
+    class_counts = {}
+    for _, label in dataset:
+        class_counts[label] = class_counts.get(label, 0) + 1
+
+    # Determine the indices to keep for each class
+    indices_per_class = {label: [] for label in class_counts.keys()}
+    for idx, (_, label) in enumerate(dataset):
+        if len(indices_per_class[label]) < samples_per_class:
+            indices_per_class[label].append(idx)
+
+    # Flatten the list of indices
+    selected_indices = [idx for indices in indices_per_class.values() for idx in indices]
+
+    return selected_indices
