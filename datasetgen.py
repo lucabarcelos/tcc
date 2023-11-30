@@ -26,7 +26,8 @@ angles = {
 
 subjects = {
     "animals": ["dog", "cat", "horse", "spider", "butterfly", "chicken", "sheep", "cow", "squirrel", "elephant"]
-    ,"fruits": ["apple braeburn", "avocado", "banana", "orange", "pear", "lemon", "lime", "papaya", "pineapple", "mango"]
+    ,"fruits": ["apple", "banana", "grape", "mango", "strawberry"]
+    ,"fruits_v0": ["apple braeburn", "avocado", "banana", "orange", "pear", "lemon", "lime", "papaya", "pineapple", "mango"]
 }
 
 locations = {}

@@ -10,7 +10,7 @@ import numpy as np
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     criterion = nn.CrossEntropyLoss()
-    num_epochs = 50
+    num_epochs = 30
 
     # Define a transform to normalize the data
     transform = transforms.Compose([
@@ -21,7 +21,7 @@ def main():
 
     genmodels = ["stable_diffusion_2_1", "realistic_vision_1_4", "kandinsky_2_2", "openjourney_v4"]
 
-    for theme in ["animals", "fruits"]:
+    for theme in ["fruits"]:
         numberOfSamples = 1000 if theme == "animals" else 500
 
         # Create datasets
@@ -34,6 +34,7 @@ def main():
         # Create dataloaders
         train_loader_real = DataLoader(train_set_real, batch_size=32, shuffle=True)
         test_loader_real = DataLoader(test_set_real, batch_size=32, shuffle=True)
+        subset_loader_real = DataLoader(subset_real, batch_size=32, shuffle=True)
 
         # Create real model
         model_real = models.resnet34()
@@ -48,41 +49,92 @@ def main():
         optimizer_real = torch.optim.Adam(model_real.parameters(), lr=0.001)
         model_real.to(device)
 
-        # # Real model train
-        # for epoch in range(num_epochs):
-        #     # Training pass
-        #     model_real.train()
-        #     running_loss = 0.0
-        #     for images, labels in train_loader_real:
-        #         images, labels = images.to(device), labels.to(device)
+        # Cretae subset model
+        model_subset = models.resnet34()
+        model_subset.fc = torch.nn.Sequential(
+            torch.nn.Linear(
+                in_features=512,
+                out_features=10
+            ),
+            torch.nn.Sigmoid()
+        )
 
-        #         optimizer_real.zero_grad()
-        #         outputs = model_real(images)
-        #         loss = criterion(outputs, labels)
-        #         loss.backward()
-        #         optimizer_real.step()
+        optimizer_subset = torch.optim.Adam(model_subset.parameters(), lr=0.001)
+        model_subset.to(device)
 
-        #         running_loss += loss.item()
 
-        #     if epoch % 5 == 0:
-        #         print(f"Training Epoch [{epoch}/{num_epochs}], Real, {theme}")
+        # Real model train
+        for epoch in range(num_epochs):
+            # Training pass
+            model_real.train()
+            running_loss = 0.0
+            for images, labels in train_loader_real:
+                images, labels = images.to(device), labels.to(device)
+
+                optimizer_real.zero_grad()
+                outputs = model_real(images)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer_real.step()
+
+                running_loss += loss.item()
+
+            if epoch % 5 == 0:
+                print(f"Training Epoch [{epoch}/{num_epochs}], Real, {theme}")
+
+
+        # Subset model train
+        for epoch in range(num_epochs):
+            # Training pass
+            model_subset.train()
+            running_loss = 0.0
+            for images, labels in subset_loader_real:
+                images, labels = images.to(device), labels.to(device)
+
+                optimizer_subset.zero_grad()
+                outputs = model_subset(images)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer_subset.step()
+
+                running_loss += loss.item()
+
+            if epoch % 5 == 0:
+                print(f"Training Epoch [{epoch}/{num_epochs}], Subset real, {theme}")
 
         
-        # # Real model test
-        # model_real.eval()
-        # total = 0
-        # total_correct = 0
+        # Real model test
+        model_real.eval()
+        total = 0
+        total_correct = 0
 
-        # with torch.no_grad():
-        #     for i, (images, labels) in enumerate(test_loader_real):
-        #         outputs = model_real(images.to(device))
-        #         _, predicted = torch.max(outputs, 1)
-        #         total += 1
-        #         total_correct += dataset_real.classes[labels[0]] == dataset_real.classes[predicted[0]]
+        with torch.no_grad():
+            for i, (images, labels) in enumerate(test_loader_real):
+                outputs = model_real(images.to(device))
+                _, predicted = torch.max(outputs, 1)
+                total += 1
+                total_correct += dataset_real.classes[labels[0]] == dataset_real.classes[predicted[0]]
 
-        # # Log accuracy
-        # with open(f"./testlogs.txt", "a") as f:
-        #     f.write(f"Theme: {theme}, Dataset: Real, Accuracy: {total_correct / total}\n")
+        # Log accuracy
+        with open(f"./testlogs.txt", "a") as f:
+            f.write(f"Theme: {theme}, Dataset: Real, Accuracy: {total_correct / total}\n")
+
+
+        # Subset model test
+        model_subset.eval()
+        total = 0
+        total_correct = 0
+
+        with torch.no_grad():
+            for i, (images, labels) in enumerate(test_loader_real):
+                outputs = model_subset(images.to(device))
+                _, predicted = torch.max(outputs, 1)
+                total += 1
+                total_correct += dataset_real.classes[labels[0]] == dataset_real.classes[predicted[0]]
+
+        # Log accuracy
+        with open(f"./testlogs.txt", "a") as f:
+            f.write(f"Theme: {theme}, Dataset: Subset real, Accuracy: {total_correct / total}\n")
 
         for genmodel in genmodels:
             # Create datasets
