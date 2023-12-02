@@ -22,7 +22,7 @@ def main():
     genmodels = ["stable_diffusion_2_1", "realistic_vision_1_4", "kandinsky_2_2", "openjourney_v4"]
 
     for theme in ["fruits"]:
-        numberOfSamples = 1000 if theme == "animals" else 500
+        numberOfSamples = 1000
 
         # Create datasets
         dataset_real = datasets.ImageFolder(root=f"real_datasets/{theme}", transform=transform)
@@ -41,7 +41,7 @@ def main():
         model_real.fc = torch.nn.Sequential(
             torch.nn.Linear(
                 in_features=512,
-                out_features=10
+                out_features=10 if theme == "animals" else 5
             ),
             torch.nn.Sigmoid()
         )
@@ -54,7 +54,7 @@ def main():
         model_subset.fc = torch.nn.Sequential(
             torch.nn.Linear(
                 in_features=512,
-                out_features=10
+                out_features=10 if theme == "animals" else 5
             ),
             torch.nn.Sigmoid()
         )
@@ -151,7 +151,7 @@ def main():
             model.fc = torch.nn.Sequential(
                 torch.nn.Linear(
                     in_features=512,
-                    out_features=10
+                    out_features=10 if theme == "animals" else 5
                 ),
                 torch.nn.Sigmoid()
             )
@@ -164,7 +164,7 @@ def main():
             model_mixed.fc = torch.nn.Sequential(
                 torch.nn.Linear(
                     in_features=512,
-                    out_features=10
+                    out_features=10 if theme == "animals" else 5
                 ),
                 torch.nn.Sigmoid()
             )
@@ -249,6 +249,8 @@ def main():
             # Log accuracy
             with open(f"./testlogs.txt", "a") as f:
                 f.write(f"Theme: {theme}, Model: {genmodel}, Dataset: Mixed, Accuracy: {total_correct / total}\n")
+
+    print("\n\n")
 
 
 

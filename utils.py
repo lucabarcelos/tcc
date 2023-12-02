@@ -96,6 +96,9 @@ def save_labels(theme, model, chosen_subjects, overwrite=False):
                 writer.writerow([subject])
 
 def max_samples_per_class(dataset, samples_per_class):
+    """
+    Returns indices from the dataset with the maximum number of samples per class.
+    """
     # Count the number of samples for each class
     class_counts = {}
     for _, label in dataset:
