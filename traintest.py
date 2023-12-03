@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader, ConcatDataset, Subset
 from torchvision import transforms, datasets, models
 from sklearn.model_selection import train_test_split
@@ -18,6 +19,7 @@ def main():
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),  # Normalization parameters for pre-trained models
     ])
+
 
     genmodels = ["stable_diffusion_2_1", "realistic_vision_1_4", "kandinsky_2_2", "openjourney_v4"]
 
@@ -47,6 +49,7 @@ def main():
         )
 
         optimizer_real = torch.optim.Adam(model_real.parameters(), lr=0.001)
+        scheduler_real = lr_scheduler.StepLR(optimizer_real, step_size=7, gamma=0.1)
         model_real.to(device)
 
         # Cretae subset model
@@ -60,6 +63,7 @@ def main():
         )
 
         optimizer_subset = torch.optim.Adam(model_subset.parameters(), lr=0.001)
+        scheduler_subset = lr_scheduler.StepLR(optimizer_subset, step_size=7, gamma=0.1)
         model_subset.to(device)
 
 
@@ -78,6 +82,8 @@ def main():
                 optimizer_real.step()
 
                 running_loss += loss.item()
+
+            scheduler_real.step()
 
             if epoch % 5 == 0:
                 print(f"Training Epoch [{epoch}/{num_epochs}], Real, {theme}")
@@ -98,6 +104,8 @@ def main():
                 optimizer_subset.step()
 
                 running_loss += loss.item()
+
+            scheduler_subset.step()
 
             if epoch % 5 == 0:
                 print(f"Training Epoch [{epoch}/{num_epochs}], Subset real, {theme}")
@@ -150,26 +158,30 @@ def main():
             model = models.resnet34()
             model.fc = torch.nn.Sequential(
                 torch.nn.Linear(
-                    in_features=512,
+                    in_features=512
+,
                     out_features=10 if theme == "animals" else 5
                 ),
                 torch.nn.Sigmoid()
             )
 
             optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+            scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
             model.to(device)
 
             # Create mixed model
             model_mixed = models.resnet34()
             model_mixed.fc = torch.nn.Sequential(
                 torch.nn.Linear(
-                    in_features=512,
+                    in_features=512
+,
                     out_features=10 if theme == "animals" else 5
                 ),
                 torch.nn.Sigmoid()
             )
 
             optimizer_mixed = torch.optim.Adam(model_mixed.parameters(), lr=0.001)
+            scheduler_mixed = lr_scheduler.StepLR(optimizer_mixed, step_size=7, gamma=0.1)
             model_mixed.to(device)
 
             # Training loop
@@ -190,6 +202,8 @@ def main():
 
                     running_loss += loss.item()
 
+                scheduler.step()
+
                 if epoch % 5 == 0:
                     print(f"Training Epoch [{epoch}/{num_epochs}], Artificial, {genmodel}, {theme}")
 
@@ -209,6 +223,8 @@ def main():
                     optimizer_mixed.step()
 
                     running_loss += loss.item()
+
+                scheduler_mixed.step()
 
                 if epoch % 5 == 0:
                     print(f"Training Epoch [{epoch}/{num_epochs}], Mixed, {genmodel}, {theme}")
@@ -251,8 +267,6 @@ def main():
                 f.write(f"Theme: {theme}, Model: {genmodel}, Dataset: Mixed, Accuracy: {total_correct / total}\n")
 
     print("\n\n")
-
-
 
 if __name__ == "__main__":
     main()
