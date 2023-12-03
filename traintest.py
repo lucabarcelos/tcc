@@ -142,7 +142,7 @@ def main():
 
         # Log accuracy
         with open(f"./testlogs.txt", "a") as f:
-            f.write(f"Theme: {theme}, Dataset: Subset real, Accuracy: {total_correct / total}\n")
+            f.write(f"Theme: {theme}, Dataset: Subset_real, Accuracy: {total_correct / total}\n")
 
         for genmodel in genmodels:
             # Create datasets
