@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import csv
+import re
 
 def generate_prompts(distances, angles, subjects, num_prompts):
     """
@@ -114,3 +115,24 @@ def max_samples_per_class(dataset, samples_per_class):
     selected_indices = [idx for indices in indices_per_class.values() for idx in indices]
 
     return selected_indices
+
+
+def parse_log_file(file_path):
+    # Regular expression to match the log line pattern with optional model
+    pattern = re.compile(r"Theme: (\w+),\s*(Model: [\w_]+,)?\s*Dataset: (\w+), Accuracy: ([0-9.]+)")
+
+    # Initialize an empty list to store the parsed data
+    data = []
+
+    with open(file_path, 'r') as file:
+        for line in file:
+            # Search for the pattern in each line
+            match = pattern.search(line)
+            if match:
+                # Extract theme, optional model, dataset, and accuracy
+                theme, model, dataset, accuracy = match.groups()
+                accuracy = float(accuracy)  # Convert accuracy to float
+                model = model.split(': ')[1] if model else None  # Extract model or set to None
+                data.append({'theme': theme, 'model': model, 'dataset': dataset, 'accuracy': accuracy})
+
+    return data
