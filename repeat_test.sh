@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Activate your mamba environment
-mamba activate tcc
+# mamba activate tcc
 
 # Loop indefinitely
 while true; do
