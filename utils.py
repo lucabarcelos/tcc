@@ -118,6 +118,10 @@ def max_samples_per_class(dataset, samples_per_class):
 
 
 def parse_log_file(file_path):
+    """
+    Parse the log file and return a list of dictionaries with the parsed data.
+    """
+    
     # Regular expression to match the log line pattern with optional model
     pattern = re.compile(r"Theme: (\w+),\s*(Model: [\w_]+,)?\s*Dataset: (\w+), Accuracy: ([0-9.]+)")
 
