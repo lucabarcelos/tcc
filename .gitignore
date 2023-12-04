@@ -165,3 +165,5 @@ real_datasets/
 test*
 
 logs.txt
+
+average_accuracies.csv
